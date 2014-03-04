@@ -37,28 +37,19 @@ function sendJSONXMLHTTPRequest(url, objects, callback) {
     xhr.onreadystatechange = function () {
         if (xhr.readyState==4) {
             try {
-                if (xhr.status==200) {
-                    //XXX: parse some JSON from the request!
-                    //XXX: Pass the data to the callback!
-                    data = JSON.parse(xhr.responseText);
-                    if(objects != undefined)
-                       // alert(objects);
-                    world = data;
+                if (xhr.status==200 && callback) {
+                    callback(xhr.responseText);
                 }
             } 
             catch(e) {
-                alert('Error: ' + e.name);
+                alert(e);
             }
         }
     };
-    xhr.open('post', "/world", true);
-    //xhr.responseType = 'json';
-    xhr.setRequestHeader('Content-type', 'application/json');
-    xhr.send(objects);
-    //xhr.send();
-    //XXX: POST to a URL
-    //XXX: set the mimetype and the accept headers!
-    // Remember to use application/json !
+    xhr.open("post", url, true);
+    xhr.setRequestHeader("Content-type","application/json");
+    xhr.setRequestHeader("Accept","*/*")
+    xhr.send(JSON.stringify(objects));
 }
 
 
@@ -145,8 +136,9 @@ function getPosition(e) {
 
 function addEntity(entity, data) {
     world[entity] = data;
-    sendJSONXMLHTTPRequest("/entity/" + entity,world[entity], null);
-    //drawNextFrame(); // (but should we?)
+    drawNextFrame(); 
+    sendJSONXMLHTTPRequest("/entity/"+entity, data);
+    // (but should we?)
     //XXX: Send a XHTML Request that updates the entity you just  modified!
 
 }
@@ -272,10 +264,9 @@ mouse.mousedraggers.push(function(x,y,clicked,e) {
 
 function update() {
     //XXX: TODO Get the world from the webservice using a XMLHTTPRequest
-    sendJSONXMLHTTPRequest("/world", null, function() { world = data; });
+    sendJSONXMLHTTPRequest("/world", "", function (data) {world = JSON.parse(data);});
     drawFrame();
 }
-
 // 30 frames per second
 setInterval( update, 1000/30.0);
 

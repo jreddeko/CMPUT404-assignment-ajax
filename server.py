@@ -78,9 +78,12 @@ def hello():
 @app.route("/entity/<entity>", methods=['POST','PUT'])
 def update(entity):
     '''update the entities via this interface'''
-    myWorld.set(entity, json.loads(request.data))
-    return str(request.data)
-
+    json = flask_post_json()
+    if request.method == 'PUT' or len(json) > 1:
+        myWorld.set(entity,json)
+    else:
+        myWorld.update(entity, json.popitem())
+    return get_entity(entity)
 @app.route("/world", methods=['POST','GET'])    
 def world():
     '''you should probably return the world here'''
